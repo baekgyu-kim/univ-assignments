@@ -6,7 +6,7 @@
 >> * 서버 : Python, Flask
 >> * DB : PostgreSQL
 > * Frontend
->>> * 프론트엔드는 없음
+>> * 프론트엔드는 없음
 
 ##### 구현한 기능
 > project_report.pdf 보고서로 작성
