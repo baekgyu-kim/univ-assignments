@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cash In</title>
+    </head>
+    <body>
+        <span>---------------------------------------------</span>
+        <div>
+            <h3>Your Current Account Info</h3>
+            <div>
+                <span>Your balance : {{balance}}</span>
+            </div>
+            <div>
+                <span>Your rating : {{rating}}</span>
+            </div>
+        </div>
+        <div>
+            <span>---------------------------------------------</span>
+        </div>
+        {% if in_out == '충전' %}
+        <form action="/cash_action" method="post">
+            <label for="cash_amount">충전 금액:</label><br />
+            <input
+                id="cash_amount"
+                type="number"
+                name="cash_amount"
+                value=""
+                required
+            /><br />
+            <input type="hidden" name="in_out" value="{{in_out}}" />
+            <input type="hidden" name="ID" value="{{ID}}" />
+            <input type="submit" name="send" value="confirm" />
+        </form>
+        {% else %}
+        <form action="/cash_action" method="post">
+            <label for="cash_amount">인출 금액:</label><br />
+            <input
+                id="cash_amount"
+                type="number"
+                name="cash_amount"
+                value=""
+                required
+            /><br />
+            <input type="hidden" name="in_out" value="{{in_out}}" />
+            <input type="hidden" name="ID" value="{{ID}}" />
+            <input type="submit" name="send" value="confirm" />
+        </form>
+        {% endif %}
+
+        <div>
+            <span>---------------------------------------------</span>
+        </div>
+        <div>
+            <input type="button" value="뒤로가기" onclick="history.back();" />
+        </div>
+    </body>
+</html>

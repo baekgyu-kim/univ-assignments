@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="wIDth=device-wIDth, initial-scale=1.0" />
+        <title>item add</title>
+    </head>
+    <body>
+        <h3>CATEGORY LIST</h3>
+        <table border="1">
+            <tbody>
+                {% for category in category_list %}
+                <tr>
+                    <td>{{ category[0] }}</td>
+                    <td>{{ category[1] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>
+            <span>========================================</span>
+        </div>
+        <form action="/add_action" method="post">
+            <label for="code">Code:</label><br />
+            <input id="code" type="text" name="code" value="" required /><br />
+
+            <label for="name">Name:</label><br />
+            <input id="name" type="text" name="name" value="" required /><br />
+
+            <label for="price">Price:</label><br />
+            <input
+                id="price"
+                type="text"
+                name="price"
+                value=""
+                required
+            /><br />
+
+            <label for="stock">stock:</label><br />
+            <input
+                id="stock"
+                type="text"
+                name="stock"
+                value=""
+                required
+            /><br />
+
+            <input type="hidden" name="ID" value="{{ID}}" />
+            <input type="submit" name="send" value="add" />
+        </form>
+
+        <div>
+            <span>---------------------------------------------</span>
+        </div>
+        <div>
+            <input type="button" value="뒤로가기" onclick="history.back();" />
+        </div>
+    </body>
+</html>

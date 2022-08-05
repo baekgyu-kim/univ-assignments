@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="wIDth=device-wIDth, initial-scale=1.0" />
+        <title>DB Trading Site</title>
+    </head>
+    <body>
+        {% if admin == True %}
+        <div class="only_admin">
+            <h3>Admin Function</h3>
+            <form action="/admin_function" method="post">
+                <input type="submit" name="send" value="users info" />
+                <input type="submit" name="send" value="trades info" />
+            </form>
+            <br />
+            <div>
+                <span>============================================</span>
+            </div>
+            <br />
+        </div>
+        {% endif %}
+
+        <table border="1">
+            <thead>
+                <th>popular category</th>
+                <th>best buyer</th>
+                <th>best seller</th>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>{{ popular_category }}</td>
+                    <td>{{ best_buyer }}</td>
+                    <td>{{ best_seller }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <span>===========================================</span>
+        </div>
+
+        <div>
+            <h3>Your Account Info</h3>
+            <div>
+                <span>current user : {{ID}}</span>
+            </div>
+            <div>
+                <span>balance : {{balance}}</span>
+            </div>
+            <div>
+                <span>rating : {{rating}}</span>
+            </div>
+        </div>
+        <form action="/cash" method="post">
+            <input type="hidden" name="ID" value="{{ID}}" />
+            <input type="submit" name="in_out" value="충전" />
+            <input type="submit" name="in_out" value="인출" />
+        </form>
+            <br />
+        <div>
+            <form action="/return" method="post">
+                <input type="submit" name="send" value="logout" />
+            </form>
+        </div>
+            <br />
+            <span>-------------------------------------------------</span>
+            <h2>ITEMS</h2>
+            <div>
+                <form action="/add" method="post">
+                    <input type="hidden" name="ID" value="{{ID}}" />
+                    <input type="submit" name="send" value="add" />
+                </form>
+            </div>
+            <br />
+
+            <table border="1">
+                <thead>
+                    <th>code</th>
+                    <th>name</th>
+                    <th>price</th>
+                    <th>stock</th>
+                    <th>seller</th>
+                </thead>
+
+                <tbody>
+                    {% for item in items_list %}
+                    <tr>
+                        <td>{{ item[0] }}</td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                        <td>{{ item[3] }}</td>
+                        <td>{{ item[4] }}</td>
+                        <td>
+                            <form action="/buy" method="post">
+                                <input
+                                    type="hidden"
+                                    name="ID"
+                                    value="{{ ID }}"
+                                />
+                            <form action="/buy" method="post">
+                                <input
+                                    type="hidden"
+                                    name="code"
+                                    value="{{item[0]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="name"
+                                    value="{{item[1]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="price"
+                                    value="{{item[2]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="stock"
+                                    value="{{item[3]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="seller"
+                                    value="{{item[4]}}"
+                                />
+                                <input type="submit" name="send" value="buy" />
+                            </form>
+                        </td>
+                        {% if admin == True %}
+                        <td>
+                            <form action="/check_category" method="post">
+                                <input
+                                        type="hidden"
+                                        name="ID"
+                                        value="{{ ID }}"
+                                    />
+                                <input
+                                        type="hidden"
+                                        name="code"
+                                        value="{{item[0]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="name"
+                                    value="{{item[1]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="price"
+                                    value="{{item[2]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="stock"
+                                    value="{{item[3]}}"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="seller"
+                                    value="{{item[4]}}"
+                                />
+                                <input type="submit" name="send" value="check category" />
+                            </form>
+
+                        </td>
+                             {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+    </body>
+</html>

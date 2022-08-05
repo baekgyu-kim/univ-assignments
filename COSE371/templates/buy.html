@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>item buy</title>
+    </head>
+    <body>
+        <h3>ITEM INFO</h3>
+        <table border="1">
+            <thead>
+                <th>code</th>
+                <th>name</th>
+                <th>price</th>
+                <th>stock</th>
+                <th>seller</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ code }}</td>
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                    <td>{{ stock }}</td>
+                    <td>{{ seller }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <span>================================================</span>
+        </div>
+        <div>
+            <div>
+                <span>Your balance : {{balance}}</span>
+            </div>
+            <div>
+                <span>Your rating : {{rating}}</span>
+            </div>
+        </div>
+        <div>
+            <span>---------------------------------------------</span>
+        </div>
+        <form action="/buy_action" method="post">
+            <label for="amount">How many?:</label><br />
+            <input
+                id="amount"
+                type="number"
+                name="amount"
+                value=""
+                required
+            /><br />
+
+            <input type="hidden" name="ID" value="{{ID}}" />
+            <input type="hidden" name="code" value="{{code}}" />
+            <input type="hidden" name="name" value="{{name}}" />
+            <input type="hidden" name="price" value="{{price}}" />
+            <input type="hidden" name="stock" value="{{stock}}" />
+            <input type="hidden" name="seller" value="{{seller}}" />
+
+            <input type="submit" name="send" value="confirm" />
+        </form>
+        <div>
+            <span>---------------------------------------------</span>
+        </div>
+        <div>
+            <input type="button" value="뒤로가기" onclick="history.back();" />
+        </div>
+    </body>
+</html>

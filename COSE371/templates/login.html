@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>login</title>
+    </head>
+    <body>
+        <form action="/login_action" method="post">
+            <label for="user_ID">ID:</label><br />
+            <input id="user_ID" type="text" name="ID" value="" required /><br />
+
+            <label for="user_pwd">PASSWORD:</label><br />
+            <input
+                id="user_pwd"
+                type="text"
+                name="password"
+                value=""
+                required
+            /><br /><br />
+
+            <input type="submit" name="send" value="login" />
+            <input type="submit" name="send" value="sign up" />
+        </form>
+    </body>
+</html>
