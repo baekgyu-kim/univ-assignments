@@ -4,7 +4,7 @@
 #### 간단한 쇼핑몰 웹 구현
 > * Backend
 >> * 서버 : Python, Flask
->>> * DB : PostgreSQL
+>> * DB : PostgreSQL
 > * Frontend
 >>> * 프론트엔드는 없음
 
