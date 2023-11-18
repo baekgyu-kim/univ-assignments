@@ -267,10 +267,25 @@ let rec eval : exp -> env -> value
     | _ -> raise (UndefinedSemantics)
   (* e1 = e2 *)
   | EQUAL (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> Bool (e1_val_int = e2_val_int)
+    | (Bool e1_val_bool, Bool e2_val_bool) -> Bool (e1_val_bool = e2_val_bool)
+    | _ -> raise (UndefinedSemantics)
   (* e1 < d2 *)
   | LESS (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> Bool (e1_val_int < e2_val_int)
+    | _ -> raise (UndefinedSemantics)
   (* NOT e *)
   | NOT of e ->
+    let e_val = eval e env in
+    match e_val with
+    | Bool e_val_bool -> Bool (not e_val_bool)
+    | _ -> raise (UndefinedSemantics)
   (* nil *)
   | NIL ->
   (* e1 :: e2 *)
