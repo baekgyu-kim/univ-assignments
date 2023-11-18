@@ -262,7 +262,7 @@ let rec eval : exp -> env -> value
     let e2_val = eval e2 env in
     match (e1_val, e2_val) with
     | (Int e1_val_int, Int e2_val_int) -> 
-      if e2_val_int = 0 then raise raise (UndefinedSemantics)
+      if e2_val_int = 0 then raise (UndefinedSemantics)
       else Int (e1_val_int / e2_val_int)
     | _ -> raise (UndefinedSemantics)
   (* e1 = e2 *)
@@ -281,7 +281,7 @@ let rec eval : exp -> env -> value
     | (Int e1_val_int, Int e2_val_int) -> Bool (e1_val_int < e2_val_int)
     | _ -> raise (UndefinedSemantics)
   (* NOT e *)
-  | NOT of e ->
+  | NOT e ->
     let e_val = eval e env in
     match e_val with
     | Bool e_val_bool -> Bool (not e_val_bool)
@@ -289,14 +289,14 @@ let rec eval : exp -> env -> value
   (* nil *)
   | NIL -> List []
   (* e1 :: e2 *)
-  | CONS of (e1, e2) ->  
+  | CONS (e1, e2) ->  
     let e1_val = eval e1 env in
     let e2_val = eval e2 env in
     match e2_val with
     | List e2_val_list -> List (e1_val::e2_val_list)
     | _ -> raise (UndefinedSemantics)    
   (* e1 @ e2 *) 
-  | APPEND of (e1, e2) ->
+  | APPEND (e1, e2) ->
     let e1_val = eval e1 env in
     let e2_val = eval e2 env in
     match (e1_val, e2_val) with
@@ -349,7 +349,7 @@ let rec eval : exp -> env -> value
   | PROC (x, e) ->
     Procedure (x, e, env)
   (* e1: 함수이름 e2: 인자 *)
-  | CALL of e1, e2 ->
+  | CALL (e1, e2) ->
     let e1_val_proc = eval e1 env in
     let e2_val_param = eval e2 env in
     match e1_val_proc with
