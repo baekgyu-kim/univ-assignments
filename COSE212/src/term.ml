@@ -323,6 +323,13 @@ let rec eval : exp -> env -> value
     | _ -> raise (UndefinedSemantics)
   (* if e1 then e2 else e3 *)
   | IF (e1, e2, e3) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    let e3_val = eval e3 env in
+    match e1_val with
+    | Bool true -> e2_val
+    | Bool false -> e3_val
+    | _ -> raise (UndefinedSemantics)
   (* let x = e1 in e2 *)
   | LET (x, e1, e2) ->
   (* letrec f(x) = e1 in e2 *)
