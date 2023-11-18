@@ -287,17 +287,40 @@ let rec eval : exp -> env -> value
     | Bool e_val_bool -> Bool (not e_val_bool)
     | _ -> raise (UndefinedSemantics)
   (* nil *)
-  | NIL ->
+  | NIL -> List []
   (* e1 :: e2 *)
-  | CONS of (e1, e2) ->      
+  | CONS of (e1, e2) ->  
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match e2_val with
+    | List e2_val_list -> List (e1_val::e2_val_list)
+    | _ -> raise (UndefinedSemantics)    
   (* e1 @ e2 *) 
   | APPEND of (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (List e1_val_list, List e2_val_list) -> List (e1_val_list @ e2_val_list)
+    | _ -> raise (UndefinedSemantics)
   (* head e *)
   | HEAD e ->
+    let e_val = eval e env in
+    match e_val with
+    | List (hd::tl) -> hd
+    | _ -> raise (UndefinedSemantics)
   (* tail e *)
   | TAIL e ->
+    let e_val = eval e env in
+    match e_val with
+    | List (hd::tl) -> List tl
+    | _ -> raise (UndefinedSemantics)
   (* isnil e *)
   | ISNIL e ->
+    let e_val = eval e env in
+    match e_val with
+    | List [] -> Bool true
+    | List _ -> Bool false
+    | _ -> raise (UndefinedSemantics)
   (* if e1 then e2 else e3 *)
   | IF (e1, e2, e3) ->
   (* let x = e1 in e2 *)
