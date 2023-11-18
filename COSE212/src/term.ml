@@ -226,13 +226,13 @@ let rec eval : exp -> env -> value
 =fun exp env ->
   match exp with
   (* () *)
-  | UNIT -> 
+  | UNIT -> Unit
   (* true *)
-  | TRUE -> 
+  | TRUE -> Bool true
   (* false *)
-  | FALSE -> 
+  | FALSE -> Bool false
   (* n *)
-  | CONST n -> 
+  | CONST n -> Int n
   (* x *)
   | VAR x ->
   (* e1 + e2 *)
