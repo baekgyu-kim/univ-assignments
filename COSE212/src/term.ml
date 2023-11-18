@@ -225,8 +225,60 @@ let rec lookup_env x e =
 let rec eval : exp -> env -> value
 =fun exp env ->
   match exp with
+  (* () *)
+  | UNIT -> 
+  (* true *)
+  | TRUE -> 
+  (* false *)
+  | FALSE -> 
+  (* n *)
+  | CONST n -> 
+  (* x *)
+  | VAR x ->
+  (* e1 + e2 *)
+  | ADD (e1, e2) ->
+  (* e1 - e2 *)
+  | SUB (e1, e2) ->
+  (* e1 * e2 *)
+  | MUL (e1, e2) ->
+  (* e1 / e2 *)
+  | DIV (e1, e2) ->
+  (* e1 = e2 *)
+  | EQUAL (e1, e2) ->
+  (* e1 < d2 *)
+  | LESS (e1, e2) ->
+  (* NOT e *)
+  | NOT of e ->
+  (* nil *)
+  | NIL ->
+  (* e1 :: e2 *)
+  | CONS of (e1, e2) ->      
+  (* e1 @ e2 *) 
+  | APPEND of (e1, e2) ->
+  (* head e *)
+  | HEAD e ->
+  (* tail e *)
+  | TAIL e ->
+  (* isnil e *)
+  | ISNIL e ->
+  (* if e1 then e2 else e3 *)
+  | IF (e1, e2, e3) ->
+  (* let x = e1 in e2 *)
+  | LET (x, e1, e2) ->
+  (* letrec f(x) = e1 in e2 *)
+  | LETREC (f, x, e1, e2) ->
+  (* letrec f(x1) = e1 and g(x2) = e2 in e3 *)
+  | LETMREC (f1, x1, e1, g, x2, e2, e3) ->
+  (* proc x e *)
+  | PROC (x, e) ->
+  (* e1 e2 *)
+  | CALL of e1, e2 ->
+  (* print e *)
   | PRINT e -> (print_endline (string_of_value (eval e env)); Unit)
-  | _ -> raise (Failure "Not implemented") (* TODO *)
+  (* e1; e2 *)
+  | SEQ (e1, e2) ->
+  (* 예외처리 *)
+  | _ -> raise (Failure "Not implemented")
 
 let runml : program -> value
 =fun pgm -> eval pgm empty_env
