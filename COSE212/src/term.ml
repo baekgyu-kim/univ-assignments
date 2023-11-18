@@ -237,12 +237,34 @@ let rec eval : exp -> env -> value
   | VAR x -> lookup_env x env
   (* e1 + e2 *)
   | ADD (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int + e2_val_int)
+    | _ -> raise (UndefinedSemantics)
   (* e1 - e2 *)
   | SUB (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int - e2_val_int)
+    | _ -> raise (UndefinedSemantics)
   (* e1 * e2 *)
   | MUL (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int * e2_val_int)
+    | _ -> raise (UndefinedSemantics)
   (* e1 / e2 *)
   | DIV (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    match (e1_val, e2_val) with
+    | (Int e1_val_int, Int e2_val_int) -> 
+      if e2_val_int = 0 then raise raise (UndefinedSemantics)
+      else Int (e1_val_int / e2_val_int)
+    | _ -> raise (UndefinedSemantics)
   (* e1 = e2 *)
   | EQUAL (e1, e2) ->
   (* e1 < d2 *)
