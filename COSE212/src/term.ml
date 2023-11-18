@@ -332,18 +332,53 @@ let rec eval : exp -> env -> value
     | _ -> raise (UndefinedSemantics)
   (* let x = e1 in e2 *)
   | LET (x, e1, e2) ->
+    let e1_val = eval e1 env in
+    eval e2 (extend_env (x, e1_val) env)
   (* letrec f(x) = e1 in e2 *)
   | LETREC (f, x, e1, e2) ->
-  (* letrec f(x1) = e1 and g(x2) = e2 in e3 *)
-  | LETMREC (f1, x1, e1, g, x2, e2, e3) ->
+    let f_added_env = extend_env (f, RecProcedure (f, x, e1, env)) env in
+    let e2_val = eval e2 f_added_env in
+    e2_val
+  (* letrec f(x) = e1 and g(y) = e2 in e3 *)
+  | LETMREC (f, x, e1, g, y, e2, e3) ->
+    let f_added_env = extend_env (f, MRecProcedure (f, x, e1, g, y, e2, env)) env in
+    let f_and_g_added_env = extend_env (g, MRecProcedure (g, y, e2, f, x, e1, env)) f_added_env in
+    let e3_val = eval e3 f_and_g_added_env in
+    e3_val
   (* proc x e *)
   | PROC (x, e) ->
-  (* e1 e2 *)
+    Procedure (x, e, env)
+  (* e1: 함수이름 e2: 인자 *)
   | CALL of e1, e2 ->
+    let e1_val_proc = eval e1 env in
+    let e2_val_param = eval e2 env in
+    match e1_val_proc with
+    (* e1_val_proc이 일반 함수의 closure인 경우 *)
+    | Procedure (x, e, env_in_proc) ->
+      let x_added_env_in_proc = extend_env (x, e2_val_param) env_in_proc in
+      let return_value = eval e x_added_env_in_proc in
+      return_value
+    (* e1_val_proc이 recursive procedure의 closure인 경우 *)
+    | RecProcedure (f, x, e, env_in_proc) ->
+      let f_added_env = extend_env (f, RecProcedure (f, x, e, env_in_proc)) env_in_proc in
+      let env_in_proc = extend_env (x, e2_val_param) f_added_env in
+      let return_value = eval e env_in_proc in
+      return_value
+    (* e1_val_proc이 mutually recursive procedure의 closure인 경우 *)
+    | MRecProcedure (f, x, ef, g, y, eg, env_in_proc) ->
+      let x_added_env_in_proc = extend_env (x, e2_val_param) env_in_proc in
+      let x_and_f_added_env_in_proc = extend_env (f, MRecProcedure (f, x, ef, g, y, eg, env_in_proc)) x_added_env_in_proc in
+      let x_and_f_and_g_added_env_in_proc = extend_env (g, MRecProcedure (g, y, eg, f, x, ef, env_in_proc)) x_and_f_added_env_in_proc in
+      let return_value = eval ef x_and_f_and_g_added_env_in_proc in
+      return_value
+    | _ -> raise (UndefinedSemantics)
   (* print e *)
   | PRINT e -> (print_endline (string_of_value (eval e env)); Unit)
   (* e1; e2 *)
   | SEQ (e1, e2) ->
+    let e1_val = eval e1 env in
+    let e2_val = eval e2 env in
+    e2_val
   (* 예외처리 *)
   | _ -> raise (Failure "Not implemented")
 
