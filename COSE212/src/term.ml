@@ -234,7 +234,7 @@ let rec eval : exp -> env -> value
   (* n *)
   | CONST n -> Int n
   (* x *)
-  | VAR x ->
+  | VAR x -> lookup_env x env
   (* e1 + e2 *)
   | ADD (e1, e2) ->
   (* e1 - e2 *)
