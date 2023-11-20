@@ -221,8 +221,8 @@ let rec lookup_env x e =
   match e with
   | [] -> raise (Failure ("variable " ^ x ^ " is not bound in env")) 
   | (y,v)::tl -> if x = y then v else lookup_env x tl
-
-let rec eval : exp -> env -> value
+  
+let rec eval : exp -> env -> value 
 =fun exp env ->
   match exp with
   (* () *)
@@ -237,151 +237,147 @@ let rec eval : exp -> env -> value
   | VAR x -> lookup_env x env
   (* e1 + e2 *)
   | ADD (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int + e2_val_int)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> Int (e1_v_int + e2_v_int)
+      | _ -> raise (UndefinedSemantics))
   (* e1 - e2 *)
   | SUB (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int - e2_val_int)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> Int (e1_v_int - e2_v_int)
+      | _ -> raise (UndefinedSemantics))
   (* e1 * e2 *)
   | MUL (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> Int (e1_val_int * e2_val_int)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> Int (e1_v_int * e2_v_int)
+      | _ -> raise (UndefinedSemantics))
   (* e1 / e2 *)
   | DIV (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> 
-      if e2_val_int = 0 then raise (UndefinedSemantics)
-      else Int (e1_val_int / e2_val_int)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> 
+        if e2_v_int = 0 then raise (UndefinedSemantics)
+        else Int (e1_v_int / e2_v_int)
+      | _ -> raise (UndefinedSemantics))
   (* e1 = e2 *)
   | EQUAL (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> Bool (e1_val_int = e2_val_int)
-    | (Bool e1_val_bool, Bool e2_val_bool) -> Bool (e1_val_bool = e2_val_bool)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> Bool (e1_v_int = e2_v_int)
+      | (Bool e1_v_bool, Bool e2_v_bool) -> Bool (e1_v_bool = e2_v_bool)
+      | (List e1_v_list, List e2_v_list) -> Bool (e1_v_list = e2_v_list)
+      | _ -> raise (UndefinedSemantics))
   (* e1 < d2 *)
   | LESS (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (Int e1_val_int, Int e2_val_int) -> Bool (e1_val_int < e2_val_int)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (Int e1_v_int, Int e2_v_int) -> Bool (e1_v_int < e2_v_int)
+      | _ -> raise (UndefinedSemantics))
   (* NOT e *)
   | NOT e ->
     let e_val = eval e env in
-    (match e_val with
-    | Bool e_val_bool -> Bool (not e_val_bool)
-    | _ -> raise (UndefinedSemantics))
+      (match e_val with
+      | Bool e_val_bool -> Bool (not e_val_bool)
+      | _ -> raise (UndefinedSemantics))
   (* nil *)
   | NIL -> List []
   (* e1 :: e2 *)
   | CONS (e1, e2) ->  
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match e2_val with
-    | List e2_val_list -> List (e1_val::e2_val_list)
-    | _ -> raise (UndefinedSemantics))    
-  (* e1 @ e2 *) 
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match e2_v with
+      | List e2_v_list -> List (e1_v::e2_v_list)
+      | _ -> raise (UndefinedSemantics))  
+  (* e1 @ e2 *)   
   | APPEND (e1, e2) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    (match (e1_val, e2_val) with
-    | (List e1_val_list, List e2_val_list) -> List (e1_val_list @ e2_val_list)
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+    let e2_v = eval e2 env in
+      (match (e1_v, e2_v) with
+      | (List e1_v_list, List e2_v_list) -> List (e1_v_list @ e2_v_list)
+      | _ -> raise (UndefinedSemantics))
   (* head e *)
   | HEAD e ->
     let e_val = eval e env in
-    (match e_val with
-    | List (hd::tl) -> hd
-    | _ -> raise (UndefinedSemantics))
+      (match e_val with
+      | List (hd::tl) -> hd
+      | _ -> raise (UndefinedSemantics))
   (* tail e *)
   | TAIL e ->
     let e_val = eval e env in
-    (match e_val with
-    | List (hd::tl) -> List tl
-    | _ -> raise (UndefinedSemantics))
+      (match e_val with
+      | List (hd::tl) -> List tl
+      | _ -> raise (UndefinedSemantics))
   (* isnil e *)
   | ISNIL e ->
     let e_val = eval e env in
-    (match e_val with
-    | List [] -> Bool true
-    | List _ -> Bool false
-    | _ -> raise (UndefinedSemantics))
+      (match e_val with
+      | List [] -> Bool true
+      | List _ -> Bool false
+      | _ -> raise (UndefinedSemantics))
   (* if e1 then e2 else e3 *)
   | IF (e1, e2, e3) ->
-    let e1_val = eval e1 env in
-    let e2_val = eval e2 env in
-    let e3_val = eval e3 env in
-    (match e1_val with
-    | Bool true -> e2_val
-    | Bool false -> e3_val
-    | _ -> raise (UndefinedSemantics))
+    let e1_v = eval e1 env in
+      (match e1_v with
+      | Bool true -> eval e2 env
+      | Bool false -> eval e3 env
+      | _ -> raise (UndefinedSemantics))
   (* let x = e1 in e2 *)
   | LET (x, e1, e2) ->
-    let e1_val = eval e1 env in
-    eval e2 (extend_env (x, e1_val) env)
+    let e1_v = eval e1 env in
+    eval e2 (extend_env (x, e1_v) env)
   (* letrec f(x) = e1 in e2 *)
   | LETREC (f, x, e1, e2) ->
     let f_added_env = extend_env (f, RecProcedure (f, x, e1, env)) env in
-    let e2_val = eval e2 f_added_env in
-    e2_val
+    eval e2 f_added_env 
   (* letrec f(x) = e1 and g(y) = e2 in e3 *)
   | LETMREC ((f, x, e1), (g, y, e2), e3) ->
     let f_added_env = extend_env (f, MRecProcedure (f, x, e1, g, y, e2, env)) env in
     let f_and_g_added_env = extend_env (g, MRecProcedure (g, y, e2, f, x, e1, env)) f_added_env in
-    let e3_val = eval e3 f_and_g_added_env in
-    e3_val
+    eval e3 f_and_g_added_env
   (* proc x e *)
   | PROC (x, e) ->
     Procedure (x, e, env)
   (* e1: 함수이름 e2: 인자 *)
   | CALL (e1, e2) ->
-    let e1_val_proc = eval e1 env in
-    let e2_val_param = eval e2 env in
-    (match e1_val_proc with
+    let e1_v_proc = eval e1 env in
+    let e2_v_param = eval e2 env in
+    (match e1_v_proc with
     (* e1_val_proc이 일반 함수의 closure인 경우 *)
-    | Procedure (x, e, env_in_proc) ->
-      let x_added_env_in_proc = extend_env (x, e2_val_param) env_in_proc in
-      let return_value = eval e x_added_env_in_proc in
-      return_value
+    | Procedure (x, e, env') ->
+      let x_added_env' = extend_env (x, e2_v_param) env' in
+      eval e x_added_env'
     (* e1_val_proc이 recursive procedure의 closure인 경우 *)
-    | RecProcedure (f, x, e, env_in_proc) ->
-      let f_added_env = extend_env (f, RecProcedure (f, x, e, env_in_proc)) env_in_proc in
-      let env_in_proc = extend_env (x, e2_val_param) f_added_env in
-      let return_value = eval e env_in_proc in
-      return_value
+    | RecProcedure (f, x, e, env') ->
+      let x_added_env' = extend_env (x, e2_v_param) env' in
+      let x_and_f_added_env' = extend_env (f, RecProcedure (f, x, e, env')) x_added_env' in
+      eval e x_and_f_added_env'
     (* e1_val_proc이 mutually recursive procedure의 closure인 경우 *)
-    | MRecProcedure (f, x, ef, g, y, eg, env_in_proc) ->
-      let x_added_env_in_proc = extend_env (x, e2_val_param) env_in_proc in
-      let x_and_f_added_env_in_proc = extend_env (f, MRecProcedure (f, x, ef, g, y, eg, env_in_proc)) x_added_env_in_proc in
-      let x_and_f_and_g_added_env_in_proc = extend_env (g, MRecProcedure (g, y, eg, f, x, ef, env_in_proc)) x_and_f_added_env_in_proc in
-      let return_value = eval ef x_and_f_and_g_added_env_in_proc in
-      return_value
+    | MRecProcedure (f, x, ef, g, y, eg, env') ->
+      let x_added_env' = extend_env (x, e2_v_param) env' in
+      let x_and_f_added_env' = extend_env (f, MRecProcedure (f, x, ef, g, y, eg, env')) x_added_env' in
+      let x_and_f_and_g_added_env' = extend_env (g, MRecProcedure (g, y, eg, f, x, ef, env')) x_and_f_added_env' in
+      eval ef x_and_f_and_g_added_env'
     | _ -> raise (UndefinedSemantics))
   (* print e *)
   | PRINT e -> (print_endline (string_of_value (eval e env)); Unit)
   (* e1; e2 *)
   | SEQ (e1, e2) ->
     let _ = eval e1 env in
-    let e2_val = eval e2 env in
-    e2_val
+    eval e2 env
+  |_ -> raise (Failure "Not implemented")
 
-let runml : program -> value
-=fun pgm -> eval pgm empty_env
+let runml : program -> value 
+= fun pgm -> eval pgm empty_env
+
+let test_result = runml double
 
 (***********************)
 (*****  Problem 2  *****)
