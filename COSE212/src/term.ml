@@ -412,7 +412,7 @@ type subst = (tyvar * typ) list
 let empty_subst = []
 
 let rec find_subst x = function
-  | [] -> raise (Failure "Not found")
+  | [] -> raise (Failure "Substitution Not found")
   | (key, value)::rest ->
     if key = x then value
     else find_subst x rest
@@ -497,7 +497,7 @@ let rec gen_equations : tyenv -> exp -> typ -> typ_eqn
     (gen_equations tenv e1 (TyFun (new_tyvar, ty))) @ (gen_equations tenv e2 new_tyvar)
   | PRINT e -> (gen_equations tenv e TyInt) @ [(ty, TyUnit)]
   | SEQ (e1, e2) -> (gen_equations tenv e1 TyUnit) @ (gen_equations tenv e2 ty)
-  |_ -> raise (Failure "Not implemented")
+  |_ -> raise (Failure "Exception")
 
 let rec a_occurs_in_t a t = 
   match t with
