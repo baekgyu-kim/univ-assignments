@@ -274,7 +274,7 @@ let rec eval : exp -> env -> value
       | (Bool e1_v_bool, Bool e2_v_bool) -> Bool (e1_v_bool = e2_v_bool)
       | (List e1_v_list, List e2_v_list) -> Bool (e1_v_list = e2_v_list)
       | _ -> raise (UndefinedSemantics))
-  (* e1 < d2 *)
+  (* e1 < e2 *)
   | LESS (e1, e2) ->
     let e1_v = eval e1 env in
     let e2_v = eval e2 env in
@@ -377,7 +377,6 @@ let rec eval : exp -> env -> value
 let runml : program -> value 
 = fun pgm -> eval pgm empty_env
 
-let test_result = runml double
 
 (***********************)
 (*****  Problem 2  *****)
@@ -391,6 +390,7 @@ type typ =
   | TyList of typ
   | TyVar of tyvar
 and tyvar = string
+and tyenv = (tyvar * typ) list
 
 exception TypeError
 
@@ -398,5 +398,152 @@ exception TypeError
 let tyvar_num = ref 0
 let fresh_tyvar () = (tyvar_num := !tyvar_num + 1; (TyVar ("t" ^ string_of_int !tyvar_num)))
 
+(* 타입 환경 *)
+let empty_tyenv = []
+let extend_tyenv (x,v) e = (x,v)::e
+let rec lookup_tyenv e x = 
+  match e with
+  | [] -> raise (Failure ("type_variable " ^ x ^ " is not bound in tyenv")) 
+  | (y,v)::tl -> if x = y then v else lookup_tyenv tl x
+
+
+(* Substitution *)
+type subst = (tyvar * typ) list
+let empty_subst = []
+
+let rec find_subst x = function
+  | [] -> raise (Failure "Not found")
+  | (key, value)::rest ->
+    if key = x then value
+    else find_subst x rest
+
+let rec apply_subst : typ -> subst -> typ
+=fun typ subst ->
+  match typ with
+  | TyUnit -> TyUnit
+  | TyInt -> TyInt
+  | TyBool -> TyBool
+  | TyList t -> TyList (apply_subst t subst)
+  | TyFun (t1,t2) -> TyFun (apply_subst t1 subst, apply_subst t2 subst)
+  | TyVar x -> try find_subst x subst with _ -> typ
+
+let rec map f lst =
+  match lst with
+  | [] -> []
+  | x :: xs -> f x :: map f xs
+
+let extend_subst tv ty subst =
+  (tv, ty) :: (map (fun (x, t) -> (x, apply_subst t [(tv, ty)])) subst)
+
+type typ_eqn = (typ * typ) list
+
+let rec gen_equations : tyenv -> exp -> typ -> typ_eqn
+=fun tenv e ty -> 
+  match e with
+  | UNIT -> [(ty, TyUnit)]
+  | TRUE -> [(ty, TyBool)]
+  | FALSE -> [(ty, TyBool)]
+  | CONST n -> [(ty, TyInt)]
+  | VAR x -> [(ty, lookup_tyenv tenv x)]
+  | ADD (e1, e2) -> [(ty, TyInt)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | SUB (e1, e2) -> [(ty, TyInt)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | MUL (e1, e2) -> [(ty, TyInt)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | DIV (e1, e2) -> [(ty, TyInt)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | EQUAL (e1, e2) -> [(ty, TyBool)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | LESS (e1, e2) -> [(ty, TyBool)] @ (gen_equations tenv e1 TyInt) @ (gen_equations tenv e2 TyInt)
+  | NOT e -> [(ty, TyBool)] @ (gen_equations tenv e TyBool)
+  | NIL -> [(ty, TyList (fresh_tyvar ()))]
+  | CONS (e1, e2) -> 
+    let t = fresh_tyvar () in
+    [(ty, TyList t)] @ (gen_equations tenv e1 t) @ (gen_equations tenv e2 (TyList t))
+  | APPEND (e1, e2) ->
+    let t = fresh_tyvar () in
+    [(ty, TyList t)] @ (gen_equations tenv e1 (TyList t)) @ (gen_equations tenv e2 (TyList t))
+  | HEAD e ->
+    let t = fresh_tyvar () in
+    [(ty, t)] @ (gen_equations tenv e (TyList t))
+  | TAIL e ->
+    let t = fresh_tyvar () in
+    [(ty, TyList t)] @ (gen_equations tenv e (TyList t))
+  | ISNIL e -> [(ty, TyBool)] @ (gen_equations tenv e (TyList (fresh_tyvar ())))
+  | IF (e1, e2, e3) -> (gen_equations tenv e1 TyBool) @ (gen_equations tenv e2 ty) @ (gen_equations tenv e3 ty)
+  | LET (x, e1, e2) -> 
+    let t = fresh_tyvar () in
+    let x_added_tyenv = extend_tyenv (x, t) tenv in
+    (gen_equations tenv e1 t) @ (gen_equations x_added_tyenv e2 ty)
+  | LETREC (f, x, e1, e2) ->
+    let tx = fresh_tyvar () in
+    let t1 = fresh_tyvar () in
+    let f_added_tyenv = extend_tyenv (f, TyFun (tx, t1)) tenv in
+    let f_x_added_tyenv = extend_tyenv (x, tx) f_added_tyenv in
+    (gen_equations f_x_added_tyenv e1 t1) @ (gen_equations f_added_tyenv e2 ty)
+  | LETMREC ((f, x1, e1), (g, x2, e2), e3) ->
+    let tx1 = fresh_tyvar () in
+    let t1 = fresh_tyvar () in
+    let tx2 = fresh_tyvar () in
+    let t2 = fresh_tyvar () in
+    let f_added_tyenv = extend_tyenv (f, TyFun (tx1, t1)) tenv in
+    let f_g_added_tyenv = extend_tyenv (g, TyFun (tx2, t2)) f_added_tyenv in
+    let f_g_x1_added_tyen = extend_tyenv (x1, tx1) f_g_added_tyenv in
+    let f_g_x2_added_tyenv = extend_tyenv (x2, tx2) f_g_added_tyenv in
+    (gen_equations f_g_x1_added_tyen e1 t1) @ (gen_equations f_g_x2_added_tyenv e2 t2) @ (gen_equations f_g_added_tyenv e3 ty)
+  | PROC (x, e) ->
+    let t1 = fresh_tyvar () in
+    let t2 = fresh_tyvar () in
+    let x_added_tyenv = extend_tyenv (x, t1) tenv in
+    [(ty, TyFun (t1, t2))] @ (gen_equations x_added_tyenv e t2)
+  | CALL (e1, e2) ->
+    let new_tyvar = fresh_tyvar () in
+    (gen_equations tenv e1 (TyFun (new_tyvar, ty))) @ (gen_equations tenv e2 new_tyvar)
+  | PRINT e -> (gen_equations tenv e TyInt) @ [(ty, TyUnit)]
+  | SEQ (e1, e2) -> (gen_equations tenv e1 TyUnit) @ (gen_equations tenv e2 ty)
+  |_ -> raise (Failure "Not implemented")
+
+let rec a_occurs_in_t a t = 
+  match t with
+  | TyUnit -> false
+  | TyInt -> false
+  | TyBool -> false
+  | TyFun (t1, t2) -> (a_occurs_in_t a t1) || (a_occurs_in_t a t2)
+  | TyList t' -> a_occurs_in_t a t'
+  | TyVar a' -> a = a'
+
+let rec unify : (typ * typ * subst) -> subst
+=fun (t1,t2,subst) ->
+  match (t1, t2) with
+  | (TyUnit, TyUnit) -> subst
+  | (TyInt, TyInt) -> subst
+  | (TyBool, TyBool) -> subst
+  | (TyVar a, TyVar y) -> if a = y then subst else extend_subst a (TyVar y) subst
+  | (TyVar a, t) ->
+    if a_occurs_in_t a t then raise (Failure "fail to unify")
+    else extend_subst a t subst
+  | (t, TyVar a) -> unify (TyVar a, t, subst)
+  | (TyFun (t1, t2), TyFun (t1', t2')) -> 
+    let s' = unify (t1, t1', subst) in
+    unify (apply_subst t2 s', apply_subst t2' s', s')
+  | (TyList t1, TyList t2) -> unify (t1, t2, subst)
+  | (_, _) -> raise (Failure "fail to unify")
+ 
+let rec unify_all : typ_eqn -> subst -> subst
+= fun eqn subst ->
+  match eqn with
+  | [] -> subst
+  | (t1, t2) :: rest -> 
+    let s' = unify (apply_subst t1 subst, apply_subst t2 subst, subst) in
+    unify_all rest s'
+
+
+let solve : typ_eqn -> subst
+=fun eqn -> unify_all eqn empty_subst
+
+
 let typecheck : program -> typ 
-=fun exp -> raise TypeError (* TODO *)
+=fun exp ->
+let new_tv = fresh_tyvar () in
+let eqns = gen_equations empty_tyenv exp new_tv in
+let subst = solve eqns in
+let ty = apply_subst new_tv subst in
+ty
+
+
